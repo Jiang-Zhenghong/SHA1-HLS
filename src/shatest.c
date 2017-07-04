@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <time.h>
 #include "sha1.h"
+#include "sds_lib.h"
 
 /*
  *  Define patterns for testing
@@ -33,27 +34,31 @@
 #define TESTB   TESTB_1 TESTB_2
 #define TESTC   "a"
 #define BILLION 1000000000L
+#define MILLION 1000000uL
 
 int main()
 {
     //SHA1Context sha;
-	unsigned Message_Digest[5];
+	/*unsigned Message_Digest[5];*/
+    unsigned * Message_Digest = (unsigned *)sds_alloc( 5 * sizeof(unsigned) );
     int i;
 
-    uint64_t diff;
+    /*uint64_t diff;*/
+    double diff;
     struct timespec start, end;
 
     /*
      *  Perform test A
      */
 
-    clock_gettime(CLOCK_MONOTONIC, &start);
+    /*clock_gettime(CLOCK_MONOTONIC, &start);*/
 
     printf("\nTest A: 'abcabcabcabcabcabcabcabc'\n");
     char testa[24] = "abcabcabcabcabcabcabcabc";
 
     int t;
-    unsigned int tin[6] = {0};
+    /*unsigned int tin[6] = {0};*/
+    unsigned int *tin = (unsigned int*)sds_alloc( 6 * sizeof(int));
     for(t = 0; t < 6; t++)
     {
         tin[t]  = ( ( (unsigned) testa[t * 4]     ) & 0xFF ) << 24;
@@ -62,12 +67,19 @@ int main()
         tin[t] |= ( ( (unsigned) testa[t * 4 + 3] ) & 0xFF );
     }
 
-    SHA1Input(Message_Digest, (const unsigned int *) tin);
 
-    clock_gettime(CLOCK_MONOTONIC, &end);
+    int j ;
+    clock_gettime(CLOCK_REALTIME, &start);
+    for (j= 0; j < 1000; ++j) 
+      SHA1Input(Message_Digest, (const unsigned int *) tin);
+    clock_gettime(CLOCK_REALTIME, &end);
+    diff = (double)(end.tv_sec - start.tv_sec) + ((double)(end.tv_nsec)*1e-9 - (double)(start.tv_nsec)*1e-9);
+    printf("1000 average: time elapsed: %.2g us\n", diff*1e3);
 
-    diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-    printf("time elapsed: %llu ns\n", (long long unsigned) diff);
+    /*diff = MILLION * float(end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;*/
+    /*diff = (double)(end.tv_sec - start.tv_sec) + ((double)(end.tv_nsec)*1e-9 - (double)(start.tv_nsec)*1e-9);*/
+    /*printf("time elapsed: %.2g us\n", diff*1e6);*/
+
     printf("\t");
     for(i = 0; i < 5 ; i++)
     {
@@ -92,7 +104,22 @@ int main()
         tin[t] |= ( ( (unsigned) testb[t * 4 + 3] ) & 0xFF );
     }
 
-    SHA1Input(Message_Digest, (const unsigned int *) tin);
+    /*clock_gettime(CLOCK_MONOTONIC, &start);*/
+    /*SHA1Input(Message_Digest, (const unsigned int *) tin);*/
+    /*clock_gettime(CLOCK_MONOTONIC, &end);*/
+
+    /*[>diff = MILLION * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;<]*/
+    /*diff = (double)(end.tv_sec - start.tv_sec) + ((double)(end.tv_nsec)*1e-9 - (double)(start.tv_nsec)*1e-9);*/
+    /*printf("time elapsed: %.2g us\n", diff*1e6);*/
+
+
+    clock_gettime(CLOCK_REALTIME, &start);
+    int k;
+    for (k= 0; k < 1000; ++k) 
+      SHA1Input(Message_Digest, (const unsigned int *) tin);
+    clock_gettime(CLOCK_REALTIME, &end);
+    diff = (double)(end.tv_sec - start.tv_sec) + ((double)(end.tv_nsec)*1e-9 - (double)(start.tv_nsec)*1e-9);
+    printf("1000 loop:time elapsed: %.2g us\n", diff*1e3);
 
     printf("\t");
     for(i = 0; i < 5 ; i++)

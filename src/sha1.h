@@ -45,7 +45,7 @@ typedef struct SHA1Context
 /*
  *  Function Prototypes
  */
-SHA1Context SHA1Reset();
+//SHA1Context SHA1Reset();
 //int SHA1Result(SHA1Context *);
 void SHA1Input(unsigned *, const unsigned int *);
 

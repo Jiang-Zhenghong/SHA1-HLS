@@ -47,116 +47,6 @@
                 ((((word) << (bits)) & 0xFFFFFFFF) | \
                 ((word) >> (32-(bits))))
 
-/* Function prototypes */
-void SHA1ProcessMessageBlock(SHA1Context *);
-void SHA1PadMessage(SHA1Context *);
-
-/*
- *  SHA1Reset
- *
- *  Description:
- *      This function will initialize the SHA1Context in preparation
- *      for computing a new message digest.
- *
- *  Parameters:
- *      context: [in/out]
- *          The context to reset.
- *
- *  Returns:
- *      Nothing.
- *
- *  Comments:
- *
- */
-SHA1Context SHA1Reset()
-{
-	SHA1Context context;
-    //context.Length_Low             = 0;
-    //context.Length_High            = 0;
-    context.Message_Block_Index    = 0;
-
-    context.Message_Digest[0]      = 0x67452301;
-    context.Message_Digest[1]      = 0xEFCDAB89;
-    context.Message_Digest[2]      = 0x98BADCFE;
-    context.Message_Digest[3]      = 0x10325476;
-    context.Message_Digest[4]      = 0xC3D2E1F0;
-
-    //context.Computed   = 0;
-    //context.Corrupted  = 0;
-
-    return context;
-}
-
-/*
- *  SHA1Result
- *
- *  Description:
- *      This function will return the 160-bit message digest into the
- *      Message_Digest array within the SHA1Context provided
- *
- *  Parameters:
- *      context: [in/out]
- *          The context to use to calculate the SHA-1 hash.
- *
- *  Returns:
- *      1 if successful, 0 if it failed.
- *
- *  Comments:
- *
- */
-//int SHA1Result(SHA1Context *context)
-//{
-
-//    if (context->Corrupted)
-//    {
-//        return 0;
-//    }
-
-//    if (!context->Computed)
-//    {
-//        SHA1PadMessage(context);
-//        context->Computed = 1;
-//    }
-
-//    return 1;
-//}
-/*SHA1Context SHA1Result(SHA1Context context)
-{
-	SHA1Context temp_context;
-	SHA1Context res_context;
-    temp_context.Length_Low            = context.Length_Low;
-    temp_context.Length_High           = context.Length_High;
-    temp_context.Message_Block_Index   = context.Message_Block_Index;
-    temp_context.Computed              = context.Computed;
-    temp_context.Corrupted             = context.Corrupted;
-
-    int i = 0;
-
-    for (i = 0; i < 64; i++)
-        temp_context.Message_Block[i]  = context.Message_Block[i];
-    for (i = 0; i < 5; i++)
-        temp_context.Message_Digest[i] = context.Message_Digest[i];
-
-    if (!temp_context.Computed)
-    {
-        SHA1PadMessage(&temp_context);
-        temp_context.Computed = 1;
-    }
-
-    res_context.Length_Low            = temp_context.Length_Low;
-    res_context.Length_High           = temp_context.Length_High;
-    res_context.Message_Block_Index   = temp_context.Message_Block_Index;
-    res_context.Computed              = temp_context.Computed;
-    res_context.Corrupted             = temp_context.Corrupted;
-
-    for (i = 0; i < 64; i++)
-        res_context.Message_Block[i]  = temp_context.Message_Block[i];
-    for (i = 0; i < 5; i++)
-        res_context.Message_Digest[i] = temp_context.Message_Digest[i];
-
-    return res_context;
-}*/
-
 /*
  *  SHA1Input
  *
@@ -179,6 +69,7 @@ SHA1Context SHA1Reset()
  *  Comments:
  *
  */
+#pragma SDS data data_mover(final_Message_Digest: AXIDMA_SIMPLE, message_array: AXIDMA_SIMPLE)
 void SHA1Input(unsigned final_Message_Digest[5], const unsigned int message_array[6])
 {
 	int i = 0;
@@ -253,7 +144,6 @@ void SHA1Input(unsigned final_Message_Digest[5], const unsigned int message_arra
     };
     int         t;                  /* Loop counter                 */
     unsigned    temp;               /* Temporary word value         */
-    unsigned    tempW;
     unsigned    W[80];              /* Word sequence                */
     unsigned    A, B, C, D, E;      /* Word buffers                 */
 #pragma HLS array_partition variable=W dim=0
@@ -268,7 +158,8 @@ void SHA1Input(unsigned final_Message_Digest[5], const unsigned int message_arra
     }
 
     W[6] = 1 << 31;
-    zeros:
+
+zeros:
     for (t = 7; t < 15; t++)
     {
       	W[t] = 0;
@@ -359,121 +250,121 @@ void SHA1Input(unsigned final_Message_Digest[5], const unsigned int message_arra
  *
  *
  */
-void SHA1ProcessMessageBlock(SHA1Context *context)
-{
-    const unsigned K[] =            /* Constants defined in SHA-1   */
-    {
-        0x5A827999,
-        0x6ED9EBA1,
-        0x8F1BBCDC,
-        0xCA62C1D6
-    };
-    int         t;                  /* Loop counter                 */
-    unsigned    temp;               /* Temporary word value         */
-    unsigned    W[80];              /* Word sequence                */
-    unsigned    A, B, C, D, E;      /* Word buffers                 */
+/*void SHA1ProcessMessageBlock(SHA1Context *context)*/
+/*{*/
+    /*const unsigned K[] =            [> Constants defined in SHA-1   <]*/
+    /*{*/
+        /*0x5A827999,*/
+        /*0x6ED9EBA1,*/
+        /*0x8F1BBCDC,*/
+        /*0xCA62C1D6*/
+    /*};*/
+    /*int         t;                  [> Loop counter                 <]*/
+    /*unsigned    temp;               [> Temporary word value         <]*/
+    /*unsigned    W[80];              [> Word sequence                <]*/
+    /*unsigned    A, B, C, D, E;      [> Word buffers                 <]*/
 
     /*
      *  Initialize the first 16 words in the array W
      */
-    for(t = 0; t < 16; t++)
-    {
-        W[t]  = ((unsigned) context->Message_Block[t * 4]) << 24;
-        W[t] |= ((unsigned) context->Message_Block[t * 4 + 1]) << 16;
-        W[t] |= ((unsigned) context->Message_Block[t * 4 + 2]) << 8;
-        W[t] |= ((unsigned) context->Message_Block[t * 4 + 3]);
-    }
+    /*for(t = 0; t < 16; t++)*/
+    /*{*/
+        /*W[t]  = ((unsigned) context->Message_Block[t * 4]) << 24;*/
+        /*W[t] |= ((unsigned) context->Message_Block[t * 4 + 1]) << 16;*/
+        /*W[t] |= ((unsigned) context->Message_Block[t * 4 + 2]) << 8;*/
+        /*W[t] |= ((unsigned) context->Message_Block[t * 4 + 3]);*/
+    /*}*/
 
-    for(t = 16; t < 80; t++)
-    {
-       W[t] = SHA1CircularShift(1,W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16]);
-    }
+    /*for(t = 16; t < 80; t++)*/
+    /*{*/
+       /*W[t] = SHA1CircularShift(1,W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16]);*/
+    /*}*/
 
-    A = context->Message_Digest[0];
-    B = context->Message_Digest[1];
-    C = context->Message_Digest[2];
-    D = context->Message_Digest[3];
-    E = context->Message_Digest[4];
-/*
-    for(t = 0; t < 20; t++)
-    {
-        temp =  SHA1CircularShift(5,A) + ((B & C) | ((~B) & D)) + E + W[t] + K[0];
-        temp &= 0xFFFFFFFF;
-        E = D;
-        D = C;
-        C = SHA1CircularShift(30,B);
-        B = A;
-        A = temp;
-    }
+    /*A = context->Message_Digest[0];*/
+    /*B = context->Message_Digest[1];*/
+    /*C = context->Message_Digest[2];*/
+    /*D = context->Message_Digest[3];*/
+    /*E = context->Message_Digest[4];*/
+/**/
+    /*for(t = 0; t < 20; t++)*/
+    /*{*/
+        /*temp =  SHA1CircularShift(5,A) + ((B & C) | ((~B) & D)) + E + W[t] + K[0];*/
+        /*temp &= 0xFFFFFFFF;*/
+        /*E = D;*/
+        /*D = C;*/
+        /*C = SHA1CircularShift(30,B);*/
+        /*B = A;*/
+        /*A = temp;*/
+    /*}*/
 
-    for(t = 20; t < 40; t++)
-    {
-        temp = SHA1CircularShift(5,A) + (B ^ C ^ D) + E + W[t] + K[1];
-        temp &= 0xFFFFFFFF;
-        E = D;
-        D = C;
-        C = SHA1CircularShift(30,B);
-        B = A;
-        A = temp;
-    }
+    /*for(t = 20; t < 40; t++)*/
+    /*{*/
+        /*temp = SHA1CircularShift(5,A) + (B ^ C ^ D) + E + W[t] + K[1];*/
+        /*temp &= 0xFFFFFFFF;*/
+        /*E = D;*/
+        /*D = C;*/
+        /*C = SHA1CircularShift(30,B);*/
+        /*B = A;*/
+        /*A = temp;*/
+    /*}*/
 
-    for(t = 40; t < 60; t++)
-    {
-        temp = SHA1CircularShift(5,A) + ((B & C) | (B & D) | (C & D)) + E + W[t] + K[2];
-        temp &= 0xFFFFFFFF;
-        E = D;
-        D = C;
-        C = SHA1CircularShift(30,B);
-        B = A;
-        A = temp;
-    }
+    /*for(t = 40; t < 60; t++)*/
+    /*{*/
+        /*temp = SHA1CircularShift(5,A) + ((B & C) | (B & D) | (C & D)) + E + W[t] + K[2];*/
+        /*temp &= 0xFFFFFFFF;*/
+        /*E = D;*/
+        /*D = C;*/
+        /*C = SHA1CircularShift(30,B);*/
+        /*B = A;*/
+        /*A = temp;*/
+    /*}*/
 
-    for(t = 60; t < 80; t++)
-    {
-        temp = SHA1CircularShift(5,A) + (B ^ C ^ D) + E + W[t] + K[3];
-        temp &= 0xFFFFFFFF;
-        E = D;
-        D = C;
-        C = SHA1CircularShift(30,B);
-        B = A;
-        A = temp;
-    }
-*/
-    for(t = 0; t < 80; t++)
-    {
-        if (t < 20)
-        {
-        	temp =  SHA1CircularShift(5,A) + ((B & C) | ((~B) & D)) + E + W[t] + K[0];
-        }
-        else if (t < 40)
-        {
-        	temp = SHA1CircularShift(5,A) + (B ^ C ^ D) + E + W[t] + K[1];
-        }
-        else if (t < 60)
-        {
-        	temp = SHA1CircularShift(5,A) + ((B & C) | (B & D) | (C & D)) + E + W[t] + K[2];
-        }
-        else
-        {
-        	temp = SHA1CircularShift(5,A) + (B ^ C ^ D) + E + W[t] + K[3];
-        }
-        temp &= 0xFFFFFFFF;
+    /*for(t = 60; t < 80; t++)*/
+    /*{*/
+        /*temp = SHA1CircularShift(5,A) + (B ^ C ^ D) + E + W[t] + K[3];*/
+        /*temp &= 0xFFFFFFFF;*/
+        /*E = D;*/
+        /*D = C;*/
+        /*C = SHA1CircularShift(30,B);*/
+        /*B = A;*/
+        /*A = temp;*/
+    /*}*/
+/**/
+    /*for(t = 0; t < 80; t++)*/
+    /*{*/
+        /*if (t < 20)*/
+        /*{*/
+            /*temp =  SHA1CircularShift(5,A) + ((B & C) | ((~B) & D)) + E + W[t] + K[0];*/
+        /*}*/
+        /*else if (t < 40)*/
+        /*{*/
+            /*temp = SHA1CircularShift(5,A) + (B ^ C ^ D) + E + W[t] + K[1];*/
+        /*}*/
+        /*else if (t < 60)*/
+        /*{*/
+            /*temp = SHA1CircularShift(5,A) + ((B & C) | (B & D) | (C & D)) + E + W[t] + K[2];*/
+        /*}*/
+        /*else*/
+        /*{*/
+            /*temp = SHA1CircularShift(5,A) + (B ^ C ^ D) + E + W[t] + K[3];*/
+        /*}*/
+        /*temp &= 0xFFFFFFFF;*/
 
-        E = D;
-        D = C;
-        C = SHA1CircularShift(30,B);
-        B = A;
-        A = temp;
-    }
+        /*E = D;*/
+        /*D = C;*/
+        /*C = SHA1CircularShift(30,B);*/
+        /*B = A;*/
+        /*A = temp;*/
+    /*}*/
 
-    context->Message_Digest[0] = (context->Message_Digest[0] + A) & 0xFFFFFFFF;
-    context->Message_Digest[1] = (context->Message_Digest[1] + B) & 0xFFFFFFFF;
-    context->Message_Digest[2] = (context->Message_Digest[2] + C) & 0xFFFFFFFF;
-    context->Message_Digest[3] = (context->Message_Digest[3] + D) & 0xFFFFFFFF;
-    context->Message_Digest[4] = (context->Message_Digest[4] + E) & 0xFFFFFFFF;
+    /*context->Message_Digest[0] = (context->Message_Digest[0] + A) & 0xFFFFFFFF;*/
+    /*context->Message_Digest[1] = (context->Message_Digest[1] + B) & 0xFFFFFFFF;*/
+    /*context->Message_Digest[2] = (context->Message_Digest[2] + C) & 0xFFFFFFFF;*/
+    /*context->Message_Digest[3] = (context->Message_Digest[3] + D) & 0xFFFFFFFF;*/
+    /*context->Message_Digest[4] = (context->Message_Digest[4] + E) & 0xFFFFFFFF;*/
 
-    context->Message_Block_Index = 0;
-}
+    /*context->Message_Block_Index = 0;*/
+/*}*/
 
 /*
 *  SHA1PadMessage
@@ -545,3 +436,112 @@ void SHA1ProcessMessageBlock(SHA1Context *context)
 
 //    SHA1ProcessMessageBlock(context);
 //}
+/* Function prototypes */
+/*void SHA1ProcessMessageBlock(SHA1Context *);*/
+/*void SHA1PadMessage(SHA1Context *);*/
+
+/*
+ *  SHA1Reset
+ *
+ *  Description:
+ *      This function will initialize the SHA1Context in preparation
+ *      for computing a new message digest.
+ *
+ *  Parameters:
+ *      context: [in/out]
+ *          The context to reset.
+ *
+ *  Returns:
+ *      Nothing.
+ *
+ *  Comments:
+ *
+ */
+/*SHA1Context SHA1Reset()*/
+/*{*/
+	/*SHA1Context context;*/
+    /*//context.Length_Low             = 0;*/
+    /*//context.Length_High            = 0;*/
+    /*context.Message_Block_Index    = 0;*/
+
+    /*context.Message_Digest[0]      = 0x67452301;*/
+    /*context.Message_Digest[1]      = 0xEFCDAB89;*/
+    /*context.Message_Digest[2]      = 0x98BADCFE;*/
+    /*context.Message_Digest[3]      = 0x10325476;*/
+    /*context.Message_Digest[4]      = 0xC3D2E1F0;*/
+
+    /*//context.Computed   = 0;*/
+    /*//context.Corrupted  = 0;*/
+
+    /*return context;*/
+/*}*/
+
+/*
+ *  SHA1Result
+ *
+ *  Description:
+ *      This function will return the 160-bit message digest into the
+ *      Message_Digest array within the SHA1Context provided
+ *
+ *  Parameters:
+ *      context: [in/out]
+ *          The context to use to calculate the SHA-1 hash.
+ *
+ *  Returns:
+ *      1 if successful, 0 if it failed.
+ *
+ *  Comments:
+ *
+ */
+/*//int SHA1Result(SHA1Context *context)*/
+/*//{*/
+
+/*//    if (context->Corrupted)*/
+/*//    {*/
+/*//        return 0;*/
+/*//    }*/
+
+/*//    if (!context->Computed)*/
+/*//    {*/
+/*//        SHA1PadMessage(context);*/
+/*//        context->Computed = 1;*/
+/*//    }*/
+
+/*//    return 1;*/
+/*//}*/
+/*SHA1Context SHA1Result(SHA1Context context)*/
+/*{*/
+	/*SHA1Context temp_context;*/
+	/*SHA1Context res_context;*/
+    /*temp_context.Length_Low            = context.Length_Low;*/
+    /*temp_context.Length_High           = context.Length_High;*/
+    /*temp_context.Message_Block_Index   = context.Message_Block_Index;*/
+    /*temp_context.Computed              = context.Computed;*/
+    /*temp_context.Corrupted             = context.Corrupted;*/
+
+    /*int i = 0;*/
+
+    /*for (i = 0; i < 64; i++)*/
+        /*temp_context.Message_Block[i]  = context.Message_Block[i];*/
+    /*for (i = 0; i < 5; i++)*/
+        /*temp_context.Message_Digest[i] = context.Message_Digest[i];*/
+
+    /*if (!temp_context.Computed)*/
+    /*{*/
+        /*SHA1PadMessage(&temp_context);*/
+        /*temp_context.Computed = 1;*/
+    /*}*/
+
+    /*res_context.Length_Low            = temp_context.Length_Low;*/
+    /*res_context.Length_High           = temp_context.Length_High;*/
+    /*res_context.Message_Block_Index   = temp_context.Message_Block_Index;*/
+    /*res_context.Computed              = temp_context.Computed;*/
+    /*res_context.Corrupted             = temp_context.Corrupted;*/
+
+    /*for (i = 0; i < 64; i++)*/
+        /*res_context.Message_Block[i]  = temp_context.Message_Block[i];*/
+    /*for (i = 0; i < 5; i++)*/
+        /*res_context.Message_Digest[i] = temp_context.Message_Digest[i];*/
+
+    /*return res_context;*/
+/*}*/
